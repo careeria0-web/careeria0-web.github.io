@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tehtävälista-sovellus - Leevi Pellinen</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .todo-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: var(--light-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .todo-app {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .todo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .todo-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .todo-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .add-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+        }
+
+        .todo-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .todo-item {
+            background: var(--light-bg);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .todo-item.completed {
+            opacity: 0.6;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 1rem;
+            color: #333;
+            word-break: break-word;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border-color);
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .project-description {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .project-description h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .project-description p {
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-description ul {
+            margin-left: 1rem;
+        }
+
+        .project-description li {
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">Leevi Pellinen</div>
+            <ul class="nav-menu">
+                <li><a href="index.html#home" class="nav-link">Koti</a></li>
+                <li><a href="index.html#about" class="nav-link">Tietoa Minusta</a></li>
+                <li><a href="index.html#experience" class="nav-link">Työkokemus</a></li>
+                <li><a href="index.html#skills" class="nav-link">Taidot</a></li>
+                <li><a href="index.html#projects" class="nav-link">Projektit</a></li>
+                <li><a href="index.html#contact" class="nav-link">Yhteystiedot</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Project Content -->
+    <section class="projects">
+        <div class="container">
+            <a href="index.html#projects" class="back-link">← Takaisin projekteihin</a>
+            
+            <div class="project-description">
+                <h2>Tehtävälista-sovellus</h2>
+                <p><strong>Roolini:</strong> Kehittäjä</p>
+                <p><strong>Tekniikat:</strong> HTML5, CSS3, JavaScript (Vanilla JS), LocalStorage API</p>
+                <p><strong>Projektin idea:</strong> Kehittää yksinkertainen tehtävälista-sovellus, jossa käyttäjät voivat lisätä, merkitä valmiiksi ja poistaa tehtäviä. Projekti auttoi oppimaan JavaScript:n perusteita kuten DOM-manipulointi, tapahtumankäsittely ja LocalStorage API:n käyttö.</p>
+                <p><strong>Ominaisuudet:</strong></p>
+                <ul>
+                    <li>Tehtävien lisääminen syöttökenttään</li>
+                    <li>Tehtävien merkitseminen valmiiksi (rasti-painikkeella)</li>
+                    <li>Tehtävien poistaminen</li>
+                    <li>Tehtävien pysyvä tallennus LocalStorage API:lla</li>
+                    <li>Tilastot: yhteensä tehtävät ja valmiiksi merkityt tehtävät</li>
+                    <li>Responsiivinen design</li>
+                </ul>
+            </div>
+
+            <div class="todo-container">
+                <div class="todo-app">
+                    <div class="todo-header">
+                        <h3>Mina Tehtävälistani</h3>
+                    </div>
+
+                    <div class="todo-input-group">
+                        <input 
+                            type="text" 
+                            id="todoInput" 
+                            class="todo-input" 
+                            placeholder="Lisää uusi tehtävä..."
+                            onkeypress="handleKeyPress(event)"
+                        >
+                        <button class="add-btn" onclick="addTodo()">Lisää</button>
+                    </div>
+
+                    <ul class="todo-list" id="todoList">
+                    </ul>
+
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">✓</div>
+                        <p>Ei tehtäviä! Kaikki valmiiksi! 🎉</p>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number" id="totalTodos">0</div>
+                            <div class="stat-label">Yhteensä</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="completedTodos">0</div>
+                            <div class="stat-label">Valmiit</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="remainingTodos">0</div>
+                            <div class="stat-label">Jäljellä</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Leevi Pellinen - Portfolio. Kaikki oikeudet pidätetään.</p>
+            <div class="social-links">
+                <a href="https://github.com/careeria0-web" class="social-link" target="_blank">GitHub</a>
+                <a href="https://www.linkedin.com" class="social-link" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const todoInput = document.getElementById('todoInput');
+        const todoList = document.getElementById('todoList');
+        const emptyState = document.getElementById('emptyState');
+        const totalTodosEl = document.getElementById('totalTodos');
+        const completedTodosEl = document.getElementById('completedTodos');
+        const remainingTodosEl = document.getElementById('remainingTodos');
+
+        const STORAGE_KEY = 'leevi-todos';
+
+        // Load todos from localStorage on page load
+        function loadTodos() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const todos = JSON.parse(stored);
+                todos.forEach(todo => renderTodo(todo));
+            }
+            updateStats();
+        }
+
+        // Add new todo
+        function addTodo() {
+            const text = todoInput.value.trim();
+            if (text === '') {
+                alert('Kirjoita tehtävä!');
+                return;
+            }
+
+            const todo = {
+                id: Date.now(),
+                text: text,
+                completed: false
+            };
+
+            saveTodo(todo);
+            renderTodo(todo);
+            todoInput.value = '';
+            todoInput.focus();
+            updateStats();
+        }
+
+        // Render todo item
+        function renderTodo(todo) {
+            const li = document.createElement('li');
+            li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+            li.id = `todo-${todo.id}`;
+
+            li.innerHTML = `
+                <input 
+                    type="checkbox" 
+                    class="checkbox" 
+                    ${todo.completed ? 'checked' : ''} 
+                    onchange="toggleTodo(${todo.id})"
+                >
+                <span class="todo-text">${escapeHtml(todo.text)}</span>
+                <button class="delete-btn" onclick="deleteTodo(${todo.id})">Poista</button>
+            `;
+
+            todoList.appendChild(li);
+        }
+
+        // Toggle todo completion
+        function toggleTodo(id) {
+            const todos = getTodos();
+            const todo = todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                saveTodos(todos);
+                const li = document.getElementById(`todo-${id}`);
+                li.classList.toggle('completed');
+                updateStats();
+            }
+        }
+
+        // Delete todo
+        function deleteTodo(id) {
+            const todos = getTodos();
+            const filtered = todos.filter(t => t.id !== id);
+            saveTodos(filtered);
+            const li = document.getElementById(`todo-${id}`);
+            li.style.animation = 'slideIn 0.3s ease reverse';
+            setTimeout(() => {
+                li.remove();
+                updateStats();
+            }, 300);
+        }
+
+        // Get all todos from localStorage
+        function getTodos() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        // Save single todo
+        function saveTodo(todo) {
+            const todos = getTodos();
+            todos.push(todo);
+            saveTodos(todos);
+        }
+
+        // Save all todos
+        function saveTodos(todos) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+        }
+
+        // Update statistics
+        function updateStats() {
+            const todos = getTodos();
+            const completed = todos.filter(t => t.completed).length;
+            const total = todos.length;
+
+            totalTodosEl.textContent = total;
+            completedTodosEl.textContent = completed;
+            remainingTodosEl.textContent = total - completed;
+
+            // Show empty state if no todos
+            if (total === 0) {
+                emptyState.style.display = 'block';
+                todoList.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                todoList.style.display = 'block';
+            }
+        }
+
+        // Handle Enter key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                addTodo();
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize app
+        loadTodos();
+    </script>
+</body>
+</html>

@@ -148,45 +148,92 @@ section {
     background-color: var(--light-bg);
 }
 
-.about-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    align-items: start;
-}
-
 .about-text p {
     margin-bottom: 1.5rem;
     font-size: 1.1rem;
     line-height: 1.8;
 }
 
-.skills h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+/* Work Experience Section */
+.experience {
+    background-color: #fff;
 }
 
-.skill-item {
-    margin-bottom: 1.5rem;
+.experience-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
 }
 
-.skill-name {
-    display: block;
+.experience-item {
+    background: var(--light-bg);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.experience-item h3 {
+    font-size: 1.3rem;
     margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.experience-meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
     font-weight: 600;
 }
 
-.skill-bar {
-    background-color: #e0e0e0;
-    height: 8px;
-    border-radius: 10px;
-    overflow: hidden;
+.experience-description {
+    line-height: 1.8;
+    color: #555;
 }
 
-.skill-progress {
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    height: 100%;
-    transition: width 1s ease;
+/* Skills Section */
+.skills {
+    background-color: var(--light-bg);
+}
+
+.skills-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.skills-list {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.skills-list h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+.skill-list {
+    list-style: none;
+}
+
+.skill-list li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.skill-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
 }
 
 /* Projects Section */
@@ -263,6 +310,39 @@ section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     text-align: center;
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+}
+
+.contact-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.contact-item h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.contact-item a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.contact-item a:hover {
+    text-decoration: underline;
+    transform: translateY(-2px);
 }
 
 .contact-description {
@@ -356,17 +436,15 @@ section {
         font-size: 1.2rem;
     }
 
-    .about-grid {
+    .contact-info {
         grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .footer .container {
-        flex-direction: column;
-        gap: 1rem;
     }
 
     .projects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .skills-content {
         grid-template-columns: 1fr;
     }
 }
