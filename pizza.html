@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PizzaPro - Pizzat Kotiin</title>
+    <link rel="stylesheet" href="pizza-styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo" onclick="showView('menu')">🍕 PizzaPro</div>
+            <nav>
+                <button class="nav-btn active" onclick="showView('menu')">Ruokalista</button>
+                <button class="nav-btn" onclick="showView('cart')">
+                    Ostoskori <span class="cart-badge" id="cartBadge">0</span>
+                </button>
+                <button class="nav-btn" onclick="showView('admin')">Admin</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Menu View -->
+        <div id="menu-view" class="view active">
+            <div class="menu-header">
+                <h1>Tervetuloa PizzaPro:lle</h1>
+                <p>Valitse pizzasi ja tilaa kotiin!</p>
+            </div>
+
+            <div class="filter-section" id="filterSection"></div>
+            
+            <div class="pizza-grid" id="pizzaGrid"></div>
+        </div>
+
+        <!-- Shopping Cart View -->
+        <div id="cart-view" class="view">
+            <div class="menu-header">
+                <h1>Ostoskori</h1>
+            </div>
+
+            <div class="cart-container">
+                <div class="cart-items" id="cartItems"></div>
+                
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>Alituote:</span>
+                        <span id="subtotal">0,00€</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Toimitus:</span>
+                        <span id="deliveryFee">Valitse alla</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Yhteensä:</span>
+                        <span id="total">0,00€</span>
+                    </div>
+                    <button class="btn btn-primary" onclick="showView('checkout')" style="width: 100%; margin-top: 20px; padding: 15px;">Jatka Tilaamaan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout View -->
+        <div id="checkout-view" class="view">
+            <div class="menu-header">
+                <h1>Tilauksen Vahvistus</h1>
+            </div>
+
+            <div class="order-form">
+                <div class="success-message" id="successMessage">
+                    ✓ Tilaus vahvistettu! Ravintola ottaa sinuun yhteyttä pian.
+                </div>
+
+                <form id="orderForm">
+                    <!-- Delivery Options -->
+                    <div class="form-section">
+                        <h2>Toimitus tai Nouto</h2>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="delivery" name="delivery" value="delivery" checked onchange="updateDeliveryFee()">
+                                <label for="delivery">🚗 Kotiinkuljetus (+5€)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="pickup" name="delivery" value="pickup" onchange="updateDeliveryFee()">
+                                <label for="pickup">🏪 Nouto ravintolasta (ilmainen)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="form-section">
+                        <h2>Asiakkaan Tiedot</h2>
+                        <div class="form-group">
+                            <label for="name">Nimi *</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Puhelinnumero *</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Sähköposti *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address -->
+                    <div class="form-section" id="deliverySection" style="display: none;">
+                        <h2>Toimitusosoite</h2>
+                        <div class="form-group">
+                            <label for="address">Katuosoite *</label>
+                            <input type="text" id="address" name="address">
+                        </div>
+                        <div class="form-group">
+                            <label for="city">Kaupunki *</label>
+                            <input type="text" id="city" name="city">
+                        </div>
+                        <div class="form-group">
+                            <label for="zip">Postinumero *</label>
+                            <input type="text" id="zip" name="zip">
+                        </div>
+                    </div>
+
+                    <!-- Special Instructions -->
+                    <div class="form-section">
+                        <h2>Erityiset Pyynnöt</h2>
+                        <div class="form-group">
+                            <label for="notes">Huomautuksia (esim. allergiat):</label>
+                            <textarea id="notes" name="notes" placeholder="Kirjoita tähän mahdolliset erityiset pyynnöt..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Payment -->
+                    <div class="form-section">
+                        <h2>Maksu</h2>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="card" name="payment" value="card" checked>
+                                <label for="card">💳 Korttimaksu</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="cash" name="payment" value="cash">
+                                <label for="cash">💵 Käteinen</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="form-section" style="background: var(--light); padding: 15px; border-radius: 8px;">
+                        <h3>Tilauksen Yhteenveto</h3>
+                        <div id="checkoutSummary"></div>
+                        <div class="summary-total" style="margin-top: 15px;">
+                            <span>Lopullinen hinta:</span>
+                            <span id="checkoutTotal">0,00€</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 16px; margin-top: 20px;">Vahvista Tilaus</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin View -->
+        <div id="admin-view" class="view">
+            <div class="menu-header">
+                <h1>Hallintopaneeli</h1>
+                <p>Hallinnoi ruokalistaa ja tilauksia</p>
+            </div>
+
+            <div class="admin-section">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" onclick="switchAdminTab('menu')">Ruokalista</button>
+                    <button class="admin-tab" onclick="switchAdminTab('orders')">Tilaukset</button>
+                </div>
+
+                <!-- Manage Menu -->
+                <div id="admin-menu" class="admin-content active">
+                    <h2 style="margin-bottom: 20px;">Lisää Uusi Pizzatuote</h2>
+                    <form id="addMenuItemForm" class="menu-item-form">
+                        <div class="form-group">
+                            <label for="adminName">Pizzan Nimi</label>
+                            <input type="text" id="adminName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminDesc">Kuvaus</label>
+                            <input type="text" id="adminDesc" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPrice">Hinta (€)</label>
+                            <input type="number" id="adminPrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminCategory">Kategoria</label>
+                            <select id="adminCategory">
+                                <option value="Klassikko">Klassikko</option>
+                                <option value="Liha">Liha</option>
+                                <option value="Kalaruoka">Kalaruoka</option>
+                                <option value="Vegaani">Vegaani</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Lisää Pizzatuote</button>
+                    </form>
+
+                    <h2 style="margin-top: 30px; margin-bottom: 20px;">Olemassa Olevat Pizzat</h2>
+                    <div class="menu-list" id="adminMenuList"></div>
+                </div>
+
+                <!-- Orders -->
+                <div id="admin-orders" class="admin-content">
+                    <h2 style="margin-bottom: 20px;">Asiakkaiden Tilaukset</h2>
+                    <div style="overflow-x: auto;">
+                        <table class="orders-table" id="ordersTable">
+                            <thead>
+                                <tr>
+                                    <th>Tilaus ID</th>
+                                    <th>Asiakkaan Nimi</th>
+                                    <th>Pizzat</th>
+                                    <th>Hinta</th>
+                                    <th>Tila</th>
+                                    <th>Toimitus</th>
+                                    <th>Toiminnot</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Order Details Modal -->
+    <div class="modal" id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Tilauksen Tiedot</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== DATA ==========
+        let menu = [
+            { id: 1, name: 'Margherita', description: 'Tomaatti, mozzarella, basilika', price: 8.99, category: 'Klassikko', image: 'https://images.pexels.com/photos/3945683/pexels-photo-3945683.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop' },
+            { id: 2, name: 'Pepperoni', description: 'Tomaatti, mozzarella, pepperoni', price: 9.99, category: 'Klassikko', image: 'https://images.pexels.com/photos/5648853/pexels-photo-5648853.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop' },
+            { id: 3, name: 'Quattro Formaggi', description: 'Neljän juuston pizza', price: 10.99, category: 'Klassikko', image: 'https://images.pexels.com/photos/1410235/pexels-photo-1410235.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop' },
+            { id: 4, name: 'Carnivore', description: 'Lihaprinssipaizza', price: 11.99, category: 'Liha', image: 'https://images.pexels.com/photos/4561795/pexels-photo-4561795.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop' },
+            { id: 5, name: 'Tuna Supreme', description: 'Tonnikala, sipuli, oliivit', price: 10.99, category: 'Kalaruoka', image: 'https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop' },
+            { id: 6, name: 'Vegan Delight', description: 'Vihanneksia ja vegaanisia tuotteita', price: 9.99, category: 'Vegaani', image: 'https://images.pexels.com/photos/9609841/pexels-photo-9609841.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop' },
+            { id: 7, name: 'BBQ Chicken', description: 'Kana, BBQ-kastike, sipuli', price: 10.99, category: 'Liha', image: 'https://images.pexels.com/photos/2144555/pexels-photo-2144555.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop' },
+            { id: 8, name: 'Hawaiian', description: 'Kinkku, ananas, pineapple', price: 9.99, category: 'Klassikko', image: 'https://images.pexels.com/photos/1126359/pexels-photo-1126359.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop' }
+        ];
+
+        let cart = [];
+        let orders = [];
+        let nextOrderId = 1;
+        const DELIVERY_FEE = 5;
+
+        // ========== INITIALIZATION ==========
+        function init() {
+            loadFromStorage();
+            renderMenu();
+            updateCartBadge();
+            renderAdminMenu();
+        }
+
+        // ========== STORAGE ==========
+        function loadFromStorage() {
+            const savedMenu = localStorage.getItem('pizzaMenu');
+            const savedCart = localStorage.getItem('pizzaCart');
+            const savedOrders = localStorage.getItem('pizzaOrders');
+            
+            if (savedMenu) menu = JSON.parse(savedMenu);
+            if (savedCart) cart = JSON.parse(savedCart);
+            if (savedOrders) {
+                orders = JSON.parse(savedOrders);
+                nextOrderId = Math.max(...orders.map(o => o.id), 0) + 1;
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('pizzaMenu', JSON.stringify(menu));
+            localStorage.setItem('pizzaCart', JSON.stringify(cart));
+            localStorage.setItem('pizzaOrders', JSON.stringify(orders));
+        }
+
+        // ========== VIEW MANAGEMENT ==========
+        function showView(viewName) {
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            const view = document.getElementById(`${viewName}-view`);
+            if (view) view.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if (viewName === 'checkout') updateCheckoutSummary();
+        }
+
+        // ========== MENU ==========
+        function renderMenu() {
+            const grid = document.getElementById('pizzaGrid');
+            grid.innerHTML = '';
+            menu.forEach(pizza => {
+                const card = document.createElement('div');
+                card.className = 'pizza-card';
+                card.innerHTML = `
+                    <img src="${pizza.image}" alt="${pizza.name}" class="pizza-image">
+                    <div class="pizza-info">
+                        <div class="pizza-name">${pizza.name}</div>
+                        <div class="pizza-description">${pizza.description}</div>
+                        <div class="pizza-price">${pizza.price.toFixed(2)}€</div>
+                        <div class="pizza-actions">
+                            <select class="size-select" id="size-${pizza.id}">
+                                <option value="S">Pieni (S)</option>
+                                <option value="M" selected>Keskisuuri (M)</option>
+                                <option value="L">Suuri (L)</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="addToCart(${pizza.id})">Lisää</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            renderFilters();
+        }
+
+        function renderFilters() {
+            const filterSection = document.getElementById('filterSection');
+            filterSection.innerHTML = '';
+            const categories = ['Kaikki', ...new Set(menu.map(p => p.category))];
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn active';
+                btn.textContent = cat;
+                btn.onclick = (e) => filterMenu(cat, e.target);
+                filterSection.appendChild(btn);
+            });
+        }
+
+        function filterMenu(category, button) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            const grid = document.getElementById('pizzaGrid');
+            grid.innerHTML = '';
+            const filtered = category === 'Kaikki' ? menu : menu.filter(p => p.category === category);
+            filtered.forEach(pizza => {
+                const card = document.createElement('div');
+                card.className = 'pizza-card';
+                card.innerHTML = `
+                    <img src="${pizza.image}" alt="${pizza.name}" class="pizza-image">
+                    <div class="pizza-info">
+                        <div class="pizza-name">${pizza.name}</div>
+                        <div class="pizza-description">${pizza.description}</div>
+                        <div class="pizza-price">${pizza.price.toFixed(2)}€</div>
+                        <div class="pizza-actions">
+                            <select class="size-select" id="size-${pizza.id}">
+                                <option value="S">Pieni (S)</option>
+                                <option value="M" selected>Keskisuuri (M)</option>
+                                <option value="L">Suuri (L)</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="addToCart(${pizza.id})">Lisää</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ========== SHOPPING CART ==========
+        function addToCart(pizzaId) {
+            const pizza = menu.find(p => p.id === pizzaId);
+            const sizeSelect = document.getElementById(`size-${pizzaId}`);
+            const size = sizeSelect.value;
+            const cartItem = { id: cart.length, pizzaId: pizza.id, name: pizza.name, price: pizza.price, size: size, quantity: 1 };
+            const existingItem = cart.find(item => item.pizzaId === pizza.id && item.size === size);
+            if (existingItem) existingItem.quantity++;
+            else cart.push(cartItem);
+            saveToStorage();
+            updateCartBadge();
+            showSuccessMessage('Pizzaa lisätty ostoskoriin!');
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+            badge.textContent = total;
+        }
+
+        function renderCart() {
+            const cartItems = document.getElementById('cartItems');
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="cart-empty">Ostoskori on tyhjä. Lisää pizzoja!</div>';
+                document.querySelector('.cart-summary').style.display = 'none';
+                return;
+            }
+            document.querySelector('.cart-summary').style.display = 'block';
+            cartItems.innerHTML = '';
+            cart.forEach((item, index) => {
+                const itemTotal = (item.price * item.quantity).toFixed(2);
+                const itemHtml = document.createElement('div');
+                itemHtml.className = 'cart-item';
+                itemHtml.innerHTML = `
+                    <div class="item-details"><div class="item-name">${item.name}</div><div class="item-size">Koko: ${item.size}</div></div>
+                    <div class="item-quantity"><button class="qty-btn" onclick="decreaseQuantity(${index})">−</button><span style="min-width: 30px; text-align: center;">${item.quantity}</span><button class="qty-btn" onclick="increaseQuantity(${index})">+</button></div>
+                    <div class="item-total">${itemTotal}€</div>
+                    <button class="remove-btn" onclick="removeFromCart(${index})">Poista</button>
+                `;
+                cartItems.appendChild(itemHtml);
+            });
+            updateCartTotal();
+        }
+
+        function increaseQuantity(index) {
+            cart[index].quantity++;
+            saveToStorage();
+            renderCart();
+        }
+
+        function decreaseQuantity(index) {
+            if (cart[index].quantity > 1) cart[index].quantity--;
+            else { removeFromCart(index); return; }
+            saveToStorage();
+            renderCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveToStorage();
+            updateCartBadge();
+            renderCart();
+        }
+
+        function updateCartTotal() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = document.getElementById('delivery').checked ? DELIVERY_FEE : 0;
+            const total = subtotal + deliveryFee;
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2) + '€';
+            document.getElementById('deliveryFee').textContent = deliveryFee > 0 ? deliveryFee.toFixed(2) + '€' : 'Ilmainen';
+            document.getElementById('total').textContent = total.toFixed(2) + '€';
+        }
+
+        function updateDeliveryFee() {
+            const deliverySection = document.getElementById('deliverySection');
+            const delivery = document.getElementById('delivery').checked;
+            deliverySection.style.display = delivery ? 'block' : 'none';
+            if (delivery) {
+                document.getElementById('address').required = true;
+                document.getElementById('city').required = true;
+                document.getElementById('zip').required = true;
+            } else {
+                document.getElementById('address').required = false;
+                document.getElementById('city').required = false;
+                document.getElementById('zip').required = false;
+            }
+            updateCartTotal();
+            updateCheckoutSummary();
+        }
+
+        // ========== CHECKOUT ==========
+        function updateCheckoutSummary() {
+            const summary = document.getElementById('checkoutSummary');
+            if (cart.length === 0) { summary.innerHTML = '<p>Ostoskori on tyhjä</p>'; return; }
+            let html = '<ul style="margin-bottom: 10px;">';
+            cart.forEach(item => { html += `<li>${item.quantity}x ${item.name} (${item.size}) - ${(item.price * item.quantity).toFixed(2)}€</li>`; });
+            html += '</ul>';
+            summary.innerHTML = html;
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = document.getElementById('delivery').checked ? DELIVERY_FEE : 0;
+            const total = subtotal + deliveryFee;
+            document.getElementById('checkoutTotal').textContent = total.toFixed(2) + '€';
+        }
+
+        function submitOrder() {
+            if (cart.length === 0) { alert('Ostoskori on tyhjä!'); return; }
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const delivery = document.getElementById('delivery').checked;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const zip = document.getElementById('zip').value;
+            const notes = document.getElementById('notes').value;
+            const payment = document.querySelector('input[name="payment"]:checked').value;
+            if (delivery && (!address || !city || !zip)) { alert('Täytä kaikki toimitusosoitteen kentät!'); return; }
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = delivery ? DELIVERY_FEE : 0;
+            const total = subtotal + deliveryFee;
+            const order = {
+                id: nextOrderId++, items: [...cart], customer: { name, phone, email },
+                delivery: delivery ? 'kotiinkuljetus' : 'nouto',
+                address: delivery ? `${address}, ${zip} ${city}` : 'Nouto ravintolasta',
+                notes, payment, total, status: 'pending',
+                timestamp: new Date().toLocaleString('fi-FI')
+            };
+            orders.push(order);
+            cart = [];
+            saveToStorage();
+            updateCartBadge();
+            document.getElementById('successMessage').classList.add('show');
+            document.getElementById('orderForm').reset();
+            setTimeout(() => {
+                document.getElementById('successMessage').classList.remove('show');
+                showView('menu');
+            }, 2000);
+        }
+
+        // ========== ADMIN ==========
+        function renderAdminMenu() {
+            const adminMenuList = document.getElementById('adminMenuList');
+            adminMenuList.innerHTML = '';
+            menu.forEach(pizza => {
+                const item = document.createElement('div');
+                item.className = 'menu-list-item';
+                item.innerHTML = `
+                    <img src="${pizza.image}" style="width: 60px; height: 60px; border-radius: 4px; object-fit: cover; margin-right: 15px;">
+                    <div class="menu-item-details"><strong>${pizza.name}</strong><br><small>${pizza.description}</small><br><small>Kategoria: ${pizza.category} | Hinta: ${pizza.price.toFixed(2)}€</small></div>
+                    <button class="btn btn-danger" onclick="deleteMenuItem(${pizza.id})">Poista</button>
+                `;
+                adminMenuList.appendChild(item);
+            });
+        }
+
+        function addMenuItem() {
+            const name = document.getElementById('adminName').value;
+            const desc = document.getElementById('adminDesc').value;
+            const price = parseFloat(document.getElementById('adminPrice').value);
+            const category = document.getElementById('adminCategory').value;
+            if (!name || !desc || !price) { alert('Täytä kaikki kentät!'); return; }
+            const newItem = {
+                id: Math.max(...menu.map(p => p.id), 0) + 1, name, description: desc, price, category,
+                image: 'https://images.pexels.com/photos/3945683/pexels-photo-3945683.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'
+            };
+            menu.push(newItem);
+            saveToStorage();
+            renderMenu();
+            renderAdminMenu();
+            document.getElementById('addMenuItemForm').reset();
+            showSuccessMessage('Pizzatuote lisätty!');
+        }
+
+        function deleteMenuItem(pizzaId) {
+            if (confirm('Poista tämä pizzatuote?')) {
+                menu = menu.filter(p => p.id !== pizzaId);
+                saveToStorage();
+                renderMenu();
+                renderAdminMenu();
+                showSuccessMessage('Pizzatuote poistettu!');
+            }
+        }
+
+        function renderOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">Ei tilauksia vielä</td></tr>';
+                return;
+            }
+            orders.forEach(order => {
+                const items = order.items.map(i => `${i.quantity}x ${i.name}`).join(', ');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>#${order.id}</td>
+                    <td>${order.customer.name}</td>
+                    <td>${items}</td>
+                    <td>${order.total.toFixed(2)}€</td>
+                    <td><span class="status-badge status-${order.status}">${getStatusText(order.status)}</span></td>
+                    <td>${order.delivery === 'kotiinkuljetus' ? '🚗 Kulj.' : '🏪 Nouto'}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="viewOrder(${order.id})" style="padding: 6px 12px; font-size: 12px; margin-right: 5px;">Näytä</button>
+                        <button class="btn btn-success" onclick="updateOrderStatus(${order.id}, 'confirmed')" style="padding: 6px 12px; font-size: 12px; margin-right: 5px;">Vahvista</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getStatusText(status) {
+            const statusMap = { 'pending': 'Odottaa', 'confirmed': 'Vahvistettu', 'delivered': 'Toimitettu', 'cancelled': 'Peruutettu' };
+            return statusMap[status] || status;
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) { order.status = newStatus; saveToStorage(); renderOrders(); showSuccessMessage(`Tilauksen tila päivitetty: ${getStatusText(newStatus)}`); }
+        }
+
+        function viewOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            const modal = document.getElementById('orderModal');
+            const modalBody = document.getElementById('modalBody');
+            let itemsHtml = '';
+            order.items.forEach(item => { itemsHtml += `<li>${item.quantity}x ${item.name} (${item.size}) - ${(item.price * item.quantity).toFixed(2)}€</li>`; });
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 15px;"><h3>Tilauksen #${order.id} Tiedot</h3><p><strong>Nimi:</strong> ${order.customer.name}</p><p><strong>Puhelin:</strong> ${order.customer.phone}</p><p><strong>Summa:</strong> ${order.total.toFixed(2)}€</p></div>
+                <ul>${itemsHtml}</ul>
+            `;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').classList.remove('active');
+        }
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`admin-${tabName}`).classList.add('active');
+            event.target.classList.add('active');
+            if (tabName === 'orders') renderOrders();
+        }
+
+        function showSuccessMessage(message) {
+            const msg = document.createElement('div');
+            msg.className = 'success-message show';
+            msg.textContent = '✓ ' + message;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 2000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+            const orderForm = document.getElementById('orderForm');
+            if (orderForm) orderForm.addEventListener('submit', function(e) { e.preventDefault(); submitOrder(); });
+            const addMenuForm = document.getElementById('addMenuItemForm');
+            if (addMenuForm) addMenuForm.addEventListener('submit', function(e) { e.preventDefault(); addMenuItem(); });
+            const cartBtn = document.querySelector('.nav-btn:nth-child(2)');
+            if (cartBtn) cartBtn.addEventListener('click', function(e) { e.preventDefault(); renderCart(); });
+            const cartView = document.getElementById('cart-view');
+            new MutationObserver(() => {
+                if (cartView && cartView.classList.contains('active')) renderCart();
+            }).observe(cartView, { attributes: true, attributeFilter: ['class'] });
+        });
+    </script>
+</body>
+</html>
